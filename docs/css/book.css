@@ -26,6 +26,7 @@ html, body{
    min-height:0 不能省，否則 flex 子項不會收縮，書會被擠出畫面。 */
 .stage{
   flex:1; min-height:0;
+  position:relative;              /* .loading 與 .diag 的定位基準 */
   display:flex; align-items:center; justify-content:center;
   padding:8px;
 }
@@ -47,6 +48,19 @@ html, body{
 .page[data-density="hard"]{ box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
 
 .loading{ position:absolute; font-size:14px; opacity:.7; }
+
+/* 版面診斷：點頁碼開關。用來確認實際拿到的 iframe 寬度，
+   因為 Google Sites 手機版左右有頁面留白，iframe 會比螢幕窄，
+   光看裝置規格會猜錯。 */
+.diag{
+  position:absolute; top:4px; left:50%; transform:translateX(-50%);
+  max-width:96%; padding:4px 9px; border-radius:6px;
+  background:rgba(0,0,0,.72); color:#fff;
+  font-size:11px; line-height:1.4; white-space:nowrap;
+  font-variant-numeric:tabular-nums; pointer-events:none; z-index:20;
+}
+.diag[hidden]{ display:none; }
+.pageno{ cursor:pointer; }
 
 /* ── 底部工具列 ─────────────────────────────────────────── */
 .bar{

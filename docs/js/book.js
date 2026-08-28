@@ -7,28 +7,33 @@ const BASE  = 'pages/' + ISSUE + '/';
 
 /* 單頁寬度下限。StPageFlip 的判斷式是：
        容器寬度 < MIN_PAGE_W × 2  →  單頁模式
-   所以 440 代表「兩頁並排的總寬滿 880px 才顯示跨頁」。
+   所以 418 代表「兩頁並排的總寬滿 836px 才顯示跨頁」。
 
-   2026-08-28 從 500 調到 440，讓大螢幕手機橫向也能看跨頁。
+   2026-08-28 從 500 調到 418，讓手機橫向也能看跨頁（含 iPhone Pro 系列，
+   它們橫向寬 852–874px，卡在 440 的門檻 880 外面）。
    原本定 500 是怕橫向跨頁後單頁被壓到剩 400px 出頭；但書本尺寸其實是
    由「高度」回推的（見下方 fit()），在 iframe 高 760 的條件下，
    單頁模式本來也只有 506px —— 改跨頁後是 458px，只縮 9%，可以接受。
 
-   實測各裝置（iframe 高 760）：
-     iPhone SE / 14 橫向 (667/844)  → 單頁 506px（寬度不到門檻）
-     iPhone 15PM 橫向   (932)       → 跨頁 458px
-     iPhone 16PM 橫向   (956)       → 跨頁 470px
-     iPhone 直向        (390/430)   → 單頁，不受影響
-     桌機欄寬 ≥896                  → 跨頁
+   實測各裝置（iframe 高 760、且 iframe 寬 = 螢幕寬）：
+     iPhone SE / mini 橫向 (667/780) → 單頁 506px（寬度不到門檻）
+     iPhone 14/15/16、15 Pro (852)   → 跨頁 418px
+     iPhone 16 Pro         (874)     → 跨頁 429px
+     iPhone Plus / Pro Max (932/956) → 跨頁 458–470px
+     iPhone 直向           (390/430) → 單頁，不受影響
+     桌機欄寬 ≥852                   → 跨頁
+
+   ⚠️ 上表假設 iframe 寬度等於螢幕寬度。Google Sites 手機版左右有頁面留白，
+   實際會更窄。真實數字用「點底部頁碼」的診斷去量，不要用裝置規格推。
 
    再往下調會讓小螢幕手機（iPhone SE 橫向）也變跨頁，
-   每頁只剩 325px，內文會小到讀不了。不要低於 440。 */
-const MIN_PAGE_W = 440;
+   每頁只剩 325px，內文會小到讀不了。不要低於 418。 */
+const MIN_PAGE_W = 418;
 
 const isPhone = matchMedia('(max-width: 820px)').matches;
 
 const $ = (id) => document.getElementById(id);
-const stage = $('stage'), bookEl = $('book');
+const stage = $('stage'), bookEl = $('book'), diag = $('diag');
 
 let manifest, ratio, pageFlip, imgs = [];
 
@@ -157,6 +162,7 @@ fetch(BASE + 'manifest.json')
       $('prev').disabled = i <= 0;
       $('next').disabled = i >= manifest.pages.length - 1;
       preload(i);
+      updateDiag();
     };
     pageFlip.on('flip', sync);
     pageFlip.on('changeState', sync);
@@ -169,6 +175,26 @@ fetch(BASE + 'manifest.json')
       const now = Date.now();
       if (now - lastTap < 320) openZoom(pageFlip.getCurrentPageIndex());
       lastTap = now;
+    });
+
+    /* 版面診斷：點一下頁碼開關。
+       手機上沒有開發者工具，這是唯一能問出「iframe 實際多寬」的方法 ——
+       Google Sites 手機版有頁面留白，iframe 會比螢幕窄，光看機型規格會猜錯。 */
+    function updateDiag() {
+      if (diag.hidden) return;
+      let mode = '?', pw = '?';
+      try {
+        mode = pageFlip.getOrientation() === 'portrait' ? '單頁' : '跨頁';
+        pw = Math.round(pageFlip.getBoundsRect().pageWidth);
+      } catch (e) { /* 尚未初始化完成就略過 */ }
+      diag.textContent =
+        'iframe ' + innerWidth + '×' + innerHeight +
+        '　' + mode + '　每頁 ' + pw + 'px' +
+        '　門檻 ' + (MIN_PAGE_W * 2);
+    }
+    $('pageno').addEventListener('click', () => {
+      diag.hidden = !diag.hidden;
+      updateDiag();
     });
 
     $('prev').addEventListener('click', () => pageFlip.flipPrev());
@@ -189,8 +215,9 @@ fetch(BASE + 'manifest.json')
     });
 
     // 視窗尺寸改變、手機轉向都要重算。轉向後尺寸不會立刻更新，故延遲一次。
-    addEventListener('resize', fit);
-    addEventListener('orientationchange', () => setTimeout(fit, 250));
+    addEventListener('resize', () => { fit(); updateDiag(); });
+    addEventListener('orientationchange',
+                     () => setTimeout(() => { fit(); updateDiag(); }, 250));
   })
   .catch(err => { $('loading').textContent = '載入失敗：' + err.message; });
 

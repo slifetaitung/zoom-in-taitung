@@ -15,13 +15,15 @@
   <div class="stage" id="stage">
     <div id="book"></div>
     <div class="loading" id="loading">載入中…</div>
+    <!-- 診斷用：點一下底部頁碼會顯示。平常隱藏，排查版面問題時才用 -->
+    <div class="diag" id="diag" hidden></div>
   </div>
 
   <!-- 底部工具列。所有按鈕至少 44×44px，底部留 safe-area -->
   <div class="bar" id="bar">
     <button class="btn" id="prev" aria-label="上一頁">‹</button>
 
-    <span class="pageno"><span id="cur">1</span> / <span id="total">–</span></span>
+    <span class="pageno" id="pageno" title="點一下顯示版面診斷"><span id="cur">1</span> / <span id="total">–</span></span>
 
     <!-- 跳頁：手機隱藏（螢幕小、鍵盤會蓋住畫面） -->
     <form class="jump desktop-only" id="jumpForm">
