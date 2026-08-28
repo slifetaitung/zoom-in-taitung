@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<!-- viewport-fit=cover：iPhone 才吃得到 env(safe-area-inset-*)，底部按鈕不會被系統列蓋住 -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zoom in Taitung｜線上翻頁書</title>
+<link rel="stylesheet" href="vendor/stPageFlip.css">
+<link rel="stylesheet" href="css/book.css">
+</head>
+<body>
+
+<div class="viewer">
+  <!-- 書本舞台：翻頁書會被塞進 #book，尺寸由 book.js 依可用空間算好 -->
+  <div class="stage" id="stage">
+    <div id="book"></div>
+    <div class="loading" id="loading">載入中…</div>
+  </div>
+
+  <!-- 底部工具列。所有按鈕至少 44×44px，底部留 safe-area -->
+  <div class="bar" id="bar">
+    <button class="btn" id="prev" aria-label="上一頁">‹</button>
+
+    <span class="pageno"><span id="cur">1</span> / <span id="total">–</span></span>
+
+    <!-- 跳頁：手機隱藏（螢幕小、鍵盤會蓋住畫面） -->
+    <form class="jump desktop-only" id="jumpForm">
+      <input type="number" id="jumpInput" min="1" aria-label="跳到指定頁" placeholder="跳頁">
+    </form>
+
+    <button class="btn" id="zoomBtn" aria-label="放大這一頁">⌕</button>
+    <!-- 全螢幕：手機隱藏；若瀏覽器不允許（iframe 未開放）也會被 JS 隱藏 -->
+    <button class="btn desktop-only" id="fsBtn" aria-label="全螢幕">⛶</button>
+
+    <button class="btn" id="next" aria-label="下一頁">›</button>
+  </div>
+</div>
+
+<!-- 放大檢視：雙擊書頁或按 ⌕ 開啟。用高解析度圖，可捲動平移 -->
+<div class="zoom" id="zoom" hidden>
+  <div class="zoom-scroll" id="zoomScroll"><img id="zoomImg" alt=""></div>
+  <button class="zoom-close" id="zoomClose" aria-label="關閉放大">✕</button>
+  <div class="zoom-hint" id="zoomHint">拖曳可移動・再點一下縮回</div>
+</div>
+
+<noscript><p style="padding:1rem">這本翻頁書需要 JavaScript，請開啟後重新整理。</p></noscript>
+
+<script src="vendor/page-flip.browser.js"></script>
+<script src="js/book.js"></script>
+</body>
+</html>
