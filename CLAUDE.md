@@ -33,7 +33,7 @@ StPageFlip 的實際判斷式在 `Render.ts`：`容器寬度 < minWidth × 2 →
 ⚠️ **絕對不要用螢幕尺寸推 iframe 寬度。** 2026-08-28 為此連錯三次
 （500 → 440 → 418），每次都以為 iPhone 15 Pro 的 iframe 是螢幕的 852px。
 加了診斷功能實際量，才發現嵌在 Google Sites 裡只有 **672px**。
-**先量再調。** 量法：點底部頁碼。
+**先量再調。** 量法：臨時在頁面上顯示 `innerWidth×innerHeight`（原版面診斷功能已於 2026-09-23 移除，見 git `cd13140`）。
 
 實測（iPhone 15 Pro 橫向、Sites 內、iframe 672×760）：
   單頁 每頁 491px、書高 672px → 要捲 393px

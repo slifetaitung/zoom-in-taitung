@@ -32,7 +32,7 @@ const MIN_PAGE_W = 320;
 const isPhone = matchMedia('(max-width: 820px)').matches;
 
 const $ = (id) => document.getElementById(id);
-const stage = $('stage'), bookEl = $('book'), diag = $('diag');
+const stage = $('stage'), bookEl = $('book');
 
 let manifest, ratio, pageFlip, imgs = [];
 
@@ -161,7 +161,6 @@ fetch(BASE + 'manifest.json')
       $('prev').disabled = i <= 0;
       $('next').disabled = i >= manifest.pages.length - 1;
       preload(i);
-      updateDiag();
     };
     pageFlip.on('flip', sync);
     pageFlip.on('changeState', sync);
@@ -174,26 +173,6 @@ fetch(BASE + 'manifest.json')
       const now = Date.now();
       if (now - lastTap < 320) openZoom(pageFlip.getCurrentPageIndex());
       lastTap = now;
-    });
-
-    /* 版面診斷：點一下頁碼開關。
-       手機上沒有開發者工具，這是唯一能問出「iframe 實際多寬」的方法 ——
-       Google Sites 手機版有頁面留白，iframe 會比螢幕窄，光看機型規格會猜錯。 */
-    function updateDiag() {
-      if (diag.hidden) return;
-      let mode = '?', pw = '?';
-      try {
-        mode = pageFlip.getOrientation() === 'portrait' ? '單頁' : '跨頁';
-        pw = Math.round(pageFlip.getBoundsRect().pageWidth);
-      } catch (e) { /* 尚未初始化完成就略過 */ }
-      diag.textContent =
-        'iframe ' + innerWidth + '×' + innerHeight +
-        '　' + mode + '　每頁 ' + pw + 'px' +
-        '　門檻 ' + (MIN_PAGE_W * 2);
-    }
-    $('pageno').addEventListener('click', () => {
-      diag.hidden = !diag.hidden;
-      updateDiag();
     });
 
     $('prev').addEventListener('click', () => pageFlip.flipPrev());
@@ -214,9 +193,9 @@ fetch(BASE + 'manifest.json')
     });
 
     // 視窗尺寸改變、手機轉向都要重算。轉向後尺寸不會立刻更新，故延遲一次。
-    addEventListener('resize', () => { fit(); updateDiag(); });
+    addEventListener('resize', fit);
     addEventListener('orientationchange',
-                     () => setTimeout(() => { fit(); updateDiag(); }, 250));
+                     () => setTimeout(fit, 250));
   })
   .catch(err => { $('loading').textContent = '載入失敗：' + err.message; });
 
